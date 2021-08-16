@@ -1,0 +1,24 @@
+{
+  "name": "mongodb-learn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node ./main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vegetableratio/mongodb-learn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vegetableratio/mongodb-learn/issues"
+  },
+  "homepage": "https://github.com/Vegetableratio/mongodb-learn#readme",
+  "dependencies": {
+    "mongodb": "^4.1.0"
+  }
+}
