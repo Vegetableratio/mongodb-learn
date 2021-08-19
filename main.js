@@ -13,7 +13,7 @@ mongoose
 
 const Schema = mongoose.Schema;
 const resourceSchema = new Schema({
-  _id: String,
+  _id: Schema.Types.ObjectId,
   id: Number,
   url: String,
   name: String,
