@@ -1,8 +1,8 @@
 const fs = require('fs');
 const fsPromises = require('fs/promises');
 const path = require('path');
-const dbPath = path.resolve(__dirname, './db_data/resource.json');
-const writePath = path.resolve(__dirname, './dist');
+const dbPath = path.resolve(__dirname, '../db_data/resource.json');
+const writePath = path.resolve(__dirname, '../dist');
 
 /**
  * 1.读取JSON文件
