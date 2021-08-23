@@ -103,6 +103,6 @@ dist
 # TernJS port file
 .tern-port
 
+# 不需要跟踪的文件
 package-lock.json
-
-db_data/
+resource.json
