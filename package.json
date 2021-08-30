@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/Vegetableratio/mongodb-learn#readme",
   "dependencies": {
+    "async": "^3.2.1",
+    "log4js": "^6.3.0",
     "mongoose": "5.13.7"
   },
   "devDependencies": {
