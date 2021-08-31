@@ -1,29 +1,51 @@
 const fs = require('fs');
 const fsPromises = require('fs/promises');
 const path = require('path');
-const queue = require('async').queue;
+const async = require('async');
 const writePath = path.resolve(__dirname, '../dist');
 const dbData = require('../db/resource.json');
-const { abort } = require('process');
 const length = dbData.length; // 17517
-const tasks = [];
+const errArry = []; // 错误日志
 
 const main = async () => {
-  console.log(`共${length}个任务`);
+  deleteFile(writePath);
   if (!fs.existsSync(writePath)) {
     await fsPromises.mkdir(writePath);
-  } else {
-    deleteFile(writePath);
   }
+  console.log(`共${length}个任务`);
+  console.log(`Did the queue start ? ${queue.started}`);
   dbData.forEach((dataItem, index) => {
-    q.push({ data: JSON.stringify(dataItem), fileName: path.resolve(writePath, `./${index}.json`) }, err => {
-      console.log('err=', err);
+    const { cnname, enname } = dataItem.data.data.info;
+    /**
+     * windows路径保留符号
+      <（小于）
+      >（大于）
+      ： (冒号)
+      "（双引号）
+      /（正斜杠）
+      \ (反斜杠)
+      | (竖线或管道)
+      ? （问号）
+      * (星号)
+     */
+    const name = `${index + 1}：${cnname}_${enname}`.replace(/[\<\>\:\"\/\\\|\?\*\t\n\r]/g, '');
+    const task = {
+      data: JSON.stringify(dataItem, null, 2),
+      fileName: path.resolve(writePath, `./${name}.json`),
+      name,
+      index,
+    };
+    queue.push(task, (error, { task, remaining }) => {
+      if (error) {
+        console.log(`An error occurred while processing task ${task.index}`, error);
+        error.name = task.name;
+        errArry.push(error);
+      }
     });
   });
+  console.log(`Did the queue start ? ${queue.started}`);
 };
-// const createFile = ({ data, fileName }) => {
-//   return fsPromises.writeFile(fileName, data, { encoding: 'utf-8' });
-// };
+
 const deleteFile = path => {
   let files = [];
   if (fs.existsSync(path)) {
@@ -36,11 +58,56 @@ const deleteFile = path => {
         fs.unlinkSync(curPath);
       }
     });
+    fs.rmdirSync(path);
   }
 };
-const q = queue(({ fileName, data }, cb) => {
-  fsPromises.writeFile(fileName, data, { encoding: 'utf-8' });
-  cb();
-}, 10);
 
+const queue = async.queue((task, completed) => {
+  const { fileName, data } = task;
+  _writeFile(fileName, data)
+    .then(() => {
+      const remaining = queue.length();
+      completed(null, { task, remaining });
+    })
+    .catch(error => {
+      const remaining = queue.length();
+      completed(error, { task, remaining });
+    });
+}, 1);
+
+queue.drain(() => {
+  console.log('Successfully processed all items');
+  _writeFile(path.resolve(__dirname, `../log/error.json`), JSON.stringify(errArry))
+    .then(() => {
+      console.log('write errFile sucess');
+    })
+    .catch(err => {
+      console.log('write errFile error', err);
+    });
+});
+
+const _writeFile = (path, data) => {
+  return new Promise((resolve, reject) => {
+    fsPromises
+      .writeFile(path, data, { encoding: 'utf-8' })
+      .then(() => {
+        resolve();
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+};
+
+const nameList = dbData.map((dataItem, index) => {
+  const { cnname, enname } = dataItem.data.data.info;
+  return `${index + 1}：${cnname}_${enname}`;
+});
+_writeFile(path.resolve(__dirname, `../log/nameList.json`), JSON.stringify(nameList))
+  .then(res => {
+    console.log('sucess');
+  })
+  .catch(error => {
+    console.log('error', error);
+  });
 length ? main() : null;
