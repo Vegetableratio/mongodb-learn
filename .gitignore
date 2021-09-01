@@ -106,3 +106,4 @@ dist
 # 不需要跟踪的文件
 package-lock.json
 resource.json
+log/
