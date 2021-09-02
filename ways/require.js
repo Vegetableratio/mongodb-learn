@@ -124,7 +124,6 @@ const main = async () => {
       index,
     };
     queue.push(task, (error, { task, remaining }) => {
-      console.log('error=', remaining);
       if (error) {
         console.log(`An error occurred while processing task ${task.index}`, error);
         error.name = task.name;
